@@ -1,11 +1,12 @@
-export LD_LIBRARY_PATH=/home/ziyan/anaconda3/envs/mqe/lib
+# export LD_LIBRARY_PATH=/home/ziyan/anaconda3/envs/mqe/lib
 # task="go1football-defender"
 # task="go1gate"
-task="go1seesaw"
+# task="go1seesaw"
 # task="go1sheep-easy"
 # task="go1sheep-hard"
 # task="go1pushbox-plane"
 # task="go1pushbox-gate"
+task="go1football-2vs2"
 # random_seed=0
 device=0
 num_envs=500
@@ -30,4 +31,5 @@ python ./openrl_ws/train.py --headless --num_envs $num_envs --train_timesteps $n
     --seed 0 \
     --exp_name test \
     --config $cfg \
-    --use_wandb
+    --use_tensorboard
+    # --use_wandb

@@ -35,15 +35,15 @@ if __name__ == '__main__':
     # task_name = "go1gate"
     # task_name = "go1football-defender"
     # task_name = "go1football-1vs1"
-    # task_name = "go1football-2vs2"
+    task_name = "go1football-2vs2"
     # task_name = "go1sheep-easy"
     # task_name = "go1sheep-hard"
     # task_name = "go1seesaw"
     # task_name = "go1door"
-    task_name = "go1pushbox"
+    # task_name = "go1pushbox"
     # task_name = "go1tug"
     # task_name = "go1wrestling"
-    task_name = "go1rotationdoor"
+    # task_name = "go1rotationdoor"
     # task_name = "go1bridge"
 
     args.num_envs = 1
@@ -55,11 +55,13 @@ if __name__ == '__main__':
         env.start_recording()
     env.reset()
     import time
+    action_sample = torch.tensor(env.action_space.sample())
     while True:
         # obs, _, _, _ = env.step(0 * torch.tensor([[[1, 0, 0],[1, 0, 0],[1, 0, 0],[1, 0, 0],],],
         #                         dtype=torch.float32, device="cuda").repeat(env.num_envs, 1, 1))
-        obs, _, done, _ = env.step(0 * torch.tensor([[[1, 0, 0],[1, 0, 0],],],
-                                dtype=torch.float32, device="cuda").repeat(env.num_envs, 1, 1))
+        # obs, _, done, _ = env.step(0 * torch.tensor([[[1, 0, 0],[1, 0, 0],],],
+        #                         dtype=torch.float32, device="cuda").repeat(env.num_envs, 1, 1))
+        obs, _, done, _ = env.step(torch.randn_like(action_sample, dtype=torch.float32, device="cuda").repeat(env.num_envs, env.num_agents, 1))
         # if done.tolist()[0]:
         #     print("done")
         #     frames = env.get_complete_frames()

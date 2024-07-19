@@ -114,7 +114,7 @@ def make_mqe_env(env_name: str, args=None, custom_cfg=None) -> Tuple[LeggedRobot
 
     if callable(custom_cfg):
         env_dict["config"] = custom_cfg(env_dict["config"])
-
+    breakpoint()
     env, env_cfg = make_env(env_dict["class"], env_dict["config"], args)
     env = env_dict["wrapper"](env)
 
