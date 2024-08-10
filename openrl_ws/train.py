@@ -53,7 +53,7 @@ def train(args):
             cfg=net.cfg,
             project_name="MQE",
             scenario_name=args.task,
-            wandb_entity="ziyanx02",
+            wandb_entity="xander2077",
             exp_name=args.exp_name,
             log_path="./log",
             use_wandb=args.use_wandb,
@@ -65,8 +65,8 @@ def train(args):
         )
     else:
         agent.train(total_time_steps=args.train_timesteps)
-    # dir_name = "./checkpoints/" + args.task + "/" + start_time_str
-    dir_name = "./checkpoints/" + args.task
+        
+    dir_name = "./checkpoints/" + args.task + "/" + args.algo +  "/" + start_time_str
     agent.save(dir_name)
 
 if __name__ == '__main__':

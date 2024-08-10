@@ -17,6 +17,9 @@ from mqe.utils.math import quat_apply_yaw, wrap_to_pi, torch_rand_sqrt_float
 from mqe.utils.helpers import class_to_dict
 
 class Go1(LeggedRobotField):
+    '''
+    A base class for Unitree Go1 robot with locomotion policy implemented in walk-these-ways
+    '''
     def __init__(self, cfg: Go1Cfg, sim_params, physics_engine, sim_device, headless):
 
         self.cfg = cfg

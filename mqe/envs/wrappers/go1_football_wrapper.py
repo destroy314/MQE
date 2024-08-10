@@ -6,6 +6,18 @@ from copy import copy
 from mqe.envs.wrappers.empty_wrapper import EmptyWrapper
 
 class Go1FootballDefenderWrapper(EmptyWrapper):
+    '''
+    num_agents: 2
+    Obs: shape (20,)
+    Action: shape (3,)
+
+    return:
+        obs: (num_envs, num_agents, obs_dim)
+        reward: (num_envs, num_agents)
+        termination: (num_envs) 
+        info: episode: max_pos_x, max_pos_y, min_pos_x, min_pos_y, pos_x, rew_ball_gate_distance_reward_scale, rew_frame_ball_gate_distance_reward_scale, rew_frame_goal_reward_scale, rew_goal_reward_scale
+              time_outs: tensor.bool
+    '''
     def __init__(self, env):
         super().__init__(env)
 
@@ -91,6 +103,16 @@ class Go1FootballDefenderWrapper(EmptyWrapper):
         return obs, reward.repeat(1, 2), termination, info
     
 class Go1FootballGameWrapper(EmptyWrapper):
+    '''
+    go1football-2vs2:
+        num_agents: 4
+        Obs: shape (22,)
+        Action: shape (3,)
+    go1football-1vs1:
+        num_agents: 2
+        Obs: shape (20,)
+        Action: shape (3,)
+    '''
     def __init__(self, env):
         super().__init__(env)
 

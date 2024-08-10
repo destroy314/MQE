@@ -33,9 +33,9 @@ if __name__ == '__main__':
 
     # task_name = "go1plane"
     # task_name = "go1gate"
-    # task_name = "go1football-defender"
+    task_name = "go1football-defender"
     # task_name = "go1football-1vs1"
-    task_name = "go1football-2vs2"
+    # task_name = "go1football-2vs2"
     # task_name = "go1sheep-easy"
     # task_name = "go1sheep-hard"
     # task_name = "go1seesaw"
@@ -54,7 +54,6 @@ if __name__ == '__main__':
     if args.record_video:
         env.start_recording()
     env.reset()
-    import time
     action_sample = torch.tensor(env.action_space.sample())
     while True:
         # obs, _, _, _ = env.step(0 * torch.tensor([[[1, 0, 0],[1, 0, 0],[1, 0, 0],[1, 0, 0],],],

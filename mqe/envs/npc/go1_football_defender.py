@@ -35,7 +35,7 @@ class Go1FootballDefender(Go1):
         else:
             raise NotImplementedError
             actions = action.reshape(self.num_envs, -1)
-            self.pre_physics_step(actions)
+            self.pre_physics_step(actions) 
         # step physics and render each frame
         self.render()
         for dec_i in range(self.decimation):
