@@ -10,8 +10,8 @@ task="go1football-defender"
 # random_seed=0
 device=1
 num_envs=1500
-num_steps=4000000000
-seed=0
+num_steps=400000000  # 400M
+seed=42
 
 algo="jrpo"
 cfg=./openrl_ws/cfgs/jrpo.yaml
@@ -23,6 +23,8 @@ cfg=./openrl_ws/cfgs/jrpo.yaml
 # cfg=./openrl_ws/cfgs/ppo.yaml
 # algo="dppo"
 # cfg=./openrl_ws/cfgs/dppo.yaml
+# algo="ppo"
+# cfg=./openrl_ws/cfgs/ppo_copy.yaml
 
 exp_name="${algo}_steps${num_steps}_seed${seed}"
 

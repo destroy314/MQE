@@ -65,9 +65,9 @@ def train(args):
         )
     else:
         agent.train(total_time_steps=args.train_timesteps)
-        
-    dir_name = "./checkpoints/" + args.task + "/" + args.algo +  "/" + start_time_str
-    agent.save(dir_name)
+
+    # dir_name = "./checkpoints/" + args.task + "/" + args.algo +  "/" + start_time_str
+    # agent.save(dir_name)
 
 if __name__ == '__main__':
     args = get_args()

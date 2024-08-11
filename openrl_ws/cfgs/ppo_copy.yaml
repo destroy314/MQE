@@ -11,7 +11,7 @@ callbacks:
   - id: "ProgressBarCallback"
   - id: "CheckpointCallback"
     args: {
-        "save_freq": 6667, # how often to save the model
-        "save_path": "./checkpoints/go1football-defender/ppo",  # where to save the model
+        "save_freq": 5000, # how often to save the model, saving a model every save_freq calls to env.step().
+        "save_path": "./checkpoints/go1football-defender/ppo_copy",  # where to save the model
         "name_prefix": "ppo", # the prefix of the saved model
     }

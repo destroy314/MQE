@@ -367,7 +367,7 @@ class Go1(LeggedRobotField):
 
         if self.cfg.control.control_type == "actuator_net" or self.cfg.control.control_type == "C":
 
-            actuator_network = torch.jit.load(self.cfg.control.actuator_network_path + "/unitree_go1.pt", map_location=self.device)
+            actuator_network = torch.jit.load(self.cfg.control.actuator_network_path + "/unitree_go1.pt", map_location=self.device)   # 电机位置 to 扭矩
 
             def eval_actuator_network(joint_pos, joint_pos_last, joint_pos_last_last, joint_vel, joint_vel_last,
                                       joint_vel_last_last):
@@ -391,6 +391,7 @@ class Go1(LeggedRobotField):
 
     def _prepare_locomotion_policy(self):
         # currently only support walk_these_ways
+        # TODO: 在这里集成新的policy
         assert self.cfg.control.locomotion_policy_dir != None, "No locomotion policy provided."
 
         locomotion_obs = self._fill_command_obs()
