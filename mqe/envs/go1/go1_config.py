@@ -248,7 +248,7 @@ class Go1Cfg(LeggedRobotFieldCfg):
 
     class obs:
 
-        class cfgs:
+        class cfgs:   # 用于指示在观测中是否包含特定的传感器数据或信息
             base_pos = True
             base_quat = True
             dof_pos = True
@@ -271,7 +271,7 @@ class Go1Cfg(LeggedRobotFieldCfg):
             rgb_image = False
             env_info = True
         
-        class scales:
+        class scales:   # 用于对不同类型的观测数据进行缩放
             base_pos = 1.0
             base_quat = 1.0
             segmentation_image = 1.0

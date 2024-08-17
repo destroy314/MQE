@@ -65,7 +65,6 @@ class BarrierTrack:
                 "Warning: Please provide cfg.terrain.TerrainPerlin to configure perlin noise for all surface to step on.",
                 color= "yellow",
             ))
-
         self.num_agents = num_agents
         self.env_origins = np.zeros((self.cfg.num_rows, self.cfg.num_cols, 3), dtype= np.float32)
         self.agent_origins = np.zeros((self.cfg.num_rows, self.cfg.num_cols, self.num_agents, 3), dtype= np.float32)
@@ -145,7 +144,7 @@ class BarrierTrack:
            +-----------------------+   ---
            |                       |     |
            |                       |     |
-      +y^  |         block         |     | track width
+      +y^  |         block         |     | block width
         |  |                       |     |
         |  |                       |     |
         |  +-----------------------+   ---
@@ -506,6 +505,8 @@ class BarrierTrack:
         self.initialize_track()               # calculate size, resolution
         self.build_heightfield_raw()          # create border (height, perlin noise)
         self.initialize_track_info_buffer()
+
+        # breakpoint()
 
         """ The track grid is defined as follow
           +y^

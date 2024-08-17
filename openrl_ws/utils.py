@@ -51,7 +51,11 @@ class mqe_openrl_wrapper(gym.Wrapper):
         return obs.cpu().numpy()
 
     def step(self, actions, extra_data: Optional[Dict[str, Any]] = None):
-        """Step all environments."""
+        """Step all environments.
+        obs: 保持不变
+        rewards: 增加last dim
+        dones: 增加last dim, 并重复num_agents个
+        """
         actions = torch.from_numpy(0.5 * actions).cuda().clip(-1, 1)
 
         obs, reward, termination, info = self.env.step(actions)
@@ -63,7 +67,6 @@ class mqe_openrl_wrapper(gym.Wrapper):
         infos = []
         for i in range(dones.shape[0]):
             infos.append({})
-
         return obs, rewards, dones, infos
 
     def close(self, **kwargs):

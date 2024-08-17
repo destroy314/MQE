@@ -8,10 +8,10 @@ use_joint_action_loss: false
 use_valuenorm: true
 use_adv_normalize: true
 callbacks:
-  - id: "ProgressBarCallback"
+  # - id: "ProgressBarCallback"
   - id: "CheckpointCallback"
     args: {
-        "save_freq": 6667, # how often to save the model
+        "save_freq": 10, # how often to save the model, 需要乘上num_envs
         "save_path": "./checkpoints/go1football-defender/ppo",  # where to save the model
-        "name_prefix": "ppo", # the prefix of the saved model
+        # "name_prefix": "ppo", # the prefix of the saved model
     }

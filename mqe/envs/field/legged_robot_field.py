@@ -278,6 +278,7 @@ class LeggedRobotField(LeggedRobot):
         terrain_cls = self.cfg.terrain.selected
         self.terrain = get_terrain_cls(terrain_cls)(self.cfg.terrain, self.num_envs, self.num_agents)
         self.terrain.add_terrain_to_sim(self.gym, self.sim, self.device)
+        # breakpoint()
         self.height_samples = torch.tensor(self.terrain.heightsamples).view(self.terrain.tot_rows, self.terrain.tot_cols).to(self.device)
 
     def _create_envs(self):

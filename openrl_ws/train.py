@@ -13,7 +13,8 @@ def train(args):
     # cfg = cfg_parser.parse_args()
 
     start_time = datetime.now()
-    start_time_str = start_time.strftime("%m/%d/%Y-%H:%M:%S")
+    start_time_str = start_time.strftime("%Y_%m_%d-%H_%M_%S")
+    args.exp_name = args.exp_name + "_" + start_time_str
 
     if args.algo == "sppo" or args.algo == "dppo":
         single_agent = True
@@ -64,10 +65,23 @@ def train(args):
             logger=logger
         )
     else:
-        agent.train(total_time_steps=args.train_timesteps)
+        logger = Logger(
+            cfg=net.cfg,
+            project_name="MQE",
+            scenario_name=args.task,
+            wandb_entity="xander2077",
+            exp_name=args.exp_name,
+            log_path="./log",
+            use_wandb=args.use_wandb,
+            use_tensorboard=args.use_tensorboard,
+        )  # defalut: none
+        agent.train(
+            total_time_steps=args.train_timesteps, 
+            logger=logger
+        )
 
-    # dir_name = "./checkpoints/" + args.task + "/" + args.algo +  "/" + start_time_str
-    # agent.save(dir_name)
+    dir_name = "./checkpoints/" + args.task + "/" + args.algo +  "/latest"
+    agent.save(dir_name)
 
 if __name__ == '__main__':
     args = get_args()

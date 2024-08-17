@@ -1,5 +1,5 @@
 # export LD_LIBRARY_PATH=/home/ziyan/anaconda3/envs/mqe/lib
-task="go1football-defender"
+# task="go1football-defender"
 # task="go1gate"
 # task="go1seesaw"
 # task="go1sheep-easy"
@@ -8,9 +8,10 @@ task="go1football-defender"
 # task="go1pushbox-gate"
 # task="go1football-1vs1"
 # task="go1football-2vs2"
+task="go1football-shoot"
 # random_seed=0
 device=0
-num_envs=500
+num_envs=1
 num_steps=400000000  # 400M
 seed=42
 
@@ -27,10 +28,9 @@ cfg=./openrl_ws/cfgs/ppo.yaml
 # algo="ppo"
 # cfg=./openrl_ws/cfgs/ppo_copy.yaml
 
-exp_name="${algo}_${num_envs}envs"
+exp_name="${algo}_steps${num_steps}_seed${seed}"
 
-python ./openrl_ws/train.py \
-    --headless \
+python ./xander_ws/test_env.py \
     --num_envs $num_envs \
     --train_timesteps $num_steps\
     --task $task \
@@ -41,4 +41,4 @@ python ./openrl_ws/train.py \
     --exp_name $exp_name \
     --config $cfg \
     --use_tensorboard \
-    # --use_wandb
+    --use_wandb

@@ -10,7 +10,7 @@ from mqe.envs.field.legged_robot_field_config import LeggedRobotFieldCfg
 from mqe.envs.configs.go1_plane_config import Go1PlaneCfg
 from mqe.envs.configs.go1_gate_config import Go1GateCfg
 from mqe.envs.configs.go1_sheep_config import SingleSheepCfg, NineSheepCfg
-from mqe.envs.configs.go1_football_config import Go1FootballDefenderCfg, Go1Football1vs1Cfg, Go1Football2vs2Cfg
+from mqe.envs.configs.go1_football_config import Go1FootballDefenderCfg, Go1Football1vs1Cfg, Go1Football2vs2Cfg, Go1FootballShootCfg
 from mqe.envs.configs.go1_seesaw_config import Go1SeesawCfg
 from mqe.envs.configs.go1_door_config import Go1DoorCfg
 from mqe.envs.configs.go1_pushbox_config import Go1PushboxCfg
@@ -25,7 +25,7 @@ from mqe.envs.wrappers.go1_gate_wrapper import Go1GateWrapper
 from mqe.envs.wrappers.go1_pushbox_wrapper import Go1PushboxWrapper
 from mqe.envs.wrappers.go1_sheep_wrapper import Go1SheepWrapper
 from mqe.envs.wrappers.go1_seesaw_wrapper import Go1SeesawWrapper
-from mqe.envs.wrappers.go1_football_wrapper import Go1FootballDefenderWrapper, Go1FootballGameWrapper
+from mqe.envs.wrappers.go1_football_wrapper import Go1FootballDefenderWrapper, Go1FootballGameWrapper, Go1FootballShootWrapper
 from mqe.envs.wrappers.go1_tug_wrapper import Go1TugWrapper
 from mqe.envs.wrappers.go1_wrestling_wrapper import Go1WrestlingWrapper
 from mqe.envs.wrappers.go1_rotation_wrapper import Go1RotationWrapper
@@ -44,7 +44,7 @@ ENV_DICT = {
     "go1gate": {
         "class": Go1,
         "config": Go1GateCfg,
-        "wrapper": Go1GateWrapper
+        "wrapper": Go1GateWrapper  # no return
     },
     "go1sheep-easy": {
         "class": Go1Sheep,
@@ -64,12 +64,12 @@ ENV_DICT = {
     "go1football-1vs1": {
         "class": Go1Object,
         "config": Go1Football1vs1Cfg,
-        "wrapper": Go1FootballGameWrapper
+        "wrapper": Go1FootballGameWrapper  # no return
     },
     "go1football-2vs2": {
         "class": Go1Object,
         "config": Go1Football2vs2Cfg,
-        "wrapper": Go1FootballGameWrapper
+        "wrapper": Go1FootballGameWrapper  # no return
     },
     "go1seesaw": {
         "class": Go1Object,
@@ -106,6 +106,11 @@ ENV_DICT = {
     #     "config": Go1DoorCfg,
     #     "wrapper": Go1SeesawWrapper
     # },
+    "go1football-shoot":{
+        "class": Go1Object,
+        "config": Go1FootballShootCfg,
+        "wrapper": Go1FootballShootWrapper
+    }
 }
 
 def make_mqe_env(env_name: str, args=None, custom_cfg=None) -> Tuple[LeggedRobotField, LeggedRobotFieldCfg]:
