@@ -36,13 +36,12 @@ class Go1(LeggedRobotField):
             self._prepare_locomotion_policy()
 
     def step(self, action):
-        
-        if self.cfg.control.control_type == "C":
+
+        if self.cfg.control.control_type == "C":  # this fork
             action = torch.clip(action, -1, 1)
-            action = self.preprocess_action(action)
+            action = self.preprocess_action(action)   # 将action转换为locomotion_action
             clip_actions = self.cfg.normalization.clip_actions
             self.actions = torch.clip(action, -clip_actions, clip_actions).reshape(self.num_envs, -1).to(self.device)
-            # action = torch.zeros([self.num_envs, 12], device = "cuda")
         else:
             actions = action.reshape(self.num_envs, -1)
             self.pre_physics_step(actions)
@@ -103,6 +102,9 @@ class Go1(LeggedRobotField):
         self.locomotion_obs[:, 66 : 70] = self.obs_buf.clock_inputs
         obs = self.locomotion_obs
         self.history_locomotion_obs = torch.cat((self.history_locomotion_obs[:, 70:], self.locomotion_obs), dim=-1)
+
+        # history_locomotion_obs: shape (num_envs * num_agents, 2100)
+        # 滚动式的历史观测，每次将最旧的观测丢弃，将新的观测添加到最后, 每次添加的是locomotion_obs shape (num_envs * num_agents, 70)
 
         locomotion_action = self.locomotion_policy(self.history_locomotion_obs)
 
@@ -402,11 +404,14 @@ class Go1(LeggedRobotField):
         adaptation_module = torch.jit.load(self.cfg.control.locomotion_policy_dir + '/adaptation_module_latest.jit', map_location=self.device)
 
         def policy(obs, info={}):
+            """
+            obs: shape (num_envs * num_agents, 2100)
+            latent: shape (num_envs * num_agents, 2)
+            action: shape (num_envs * num_agents, 12) 
+            """
             with torch.no_grad():
-                
                 latent = adaptation_module.forward(obs)
                 action = body.forward(torch.cat((obs, latent), dim=-1))
-
             info['latent'] = latent
             return action
         

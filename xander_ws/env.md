@@ -1,4 +1,9 @@
-### Go1Football 1v1
+单个环境由mqe.envs.utils中的make_mqe_env定义，每个环境由三个类组成：
+- mqe.envs.npc
+- mqe.envs.configs
+- mqe.envs.wrappers
+
+
 
 env:
     mqe_openrl_wrapper（统一接口，将obs转到cpu上，将action转到cuda上）
@@ -15,9 +20,45 @@ env:
     
 
 
-"class": Go1Object
+"class": 
+- Go1Object(Go1)
+  定义了npc(ball...)的prepare/create函数，无调用
+
+- Go1(LeggedRobotField)  主要的定义都在这里，包括Go1的locomotion policy
+  
 
 
+- LeggedRobotField(LeggedRobot)
+
+
+
+
+
+- LeggedRobot(BaseTask): 主体函数
+  step()
+    - pre_physics_step()
+    - render()
+    - _compute_torques()
+    - set_dof_actuation_force_tensor() 施加扭矩，分为self.decimation个
+    - post_physics_step()
+      - check_termination
+      - compute_reward
+      - _step_npc
+      - reset_idx
+      - compute_observations
+
+  _create_envs()
+
+
+- BaseTask  主要是仿真gym的定义
+  obs_buf: (num_envs, num_obs)
+  rew_buf: (num_envs*num_agents)
+  reset_buf: (num_envs,)
+  episode_length_buf: (num_envs,)
+  time_out_buf: (num_envs,)
+  collide_buf: (num_envs,)
+
+  reset(): 调用一次reset_idx, 再调用一次step, return obs, privileged_obs
 
 "config": 
 1. Go1Football1vs1Cfg

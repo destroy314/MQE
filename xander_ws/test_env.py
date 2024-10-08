@@ -3,12 +3,6 @@ from openrl_ws.utils import get_args
 import torch
 
 if __name__ == '__main__':
-    import debugpy; debugpy.connect(50678)
-    # debugpy.listen(12361)
-    # print('wait debugger')
-    # debugpy.wait_for_client()
-    # print("Debugger Attached")
-
     args = get_args()
 
     # task_name = "go1plane"
@@ -28,7 +22,7 @@ if __name__ == '__main__':
     task_name = "go1football-shoot"
 
     args.num_envs = 1
-    args.headless = False
+    args.headless = True
 
     env, env_cfg = make_mqe_env(task_name, args, custom_cfg(args))
     env.reset()

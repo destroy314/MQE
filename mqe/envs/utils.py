@@ -125,7 +125,9 @@ def make_mqe_env(env_name: str, args=None, custom_cfg=None) -> Tuple[LeggedRobot
     return env, env_cfg
 
 def custom_cfg(args):
-
+    """
+    对env_dict["config"]加工, 将env_dict["config"]中预定义的num_envs替换成train()中输入的args.num_envs, 另外包括是否record_video
+    """
     def fn(cfg:LeggedRobotFieldCfg):
         
         if getattr(args, "num_envs", None) is not None:
