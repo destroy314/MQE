@@ -4,6 +4,8 @@ from mqe.envs.go1.go1 import Go1
 from mqe.envs.npc.go1_sheep import Go1Sheep
 from mqe.envs.npc.go1_object import Go1Object
 from mqe.envs.npc.go1_football_defender import Go1FootballDefender
+# from mqe.envs.npc.go2_football_defender import Go2FootballDefender
+
 
 # configs
 from mqe.envs.field.legged_robot_field_config import LeggedRobotFieldCfg
@@ -19,6 +21,7 @@ from mqe.envs.configs.go1_wrestling_config import Go1WrestlingCfg
 from mqe.envs.configs.go1_rotation_config import Go1RotationCfg
 from mqe.envs.configs.go1_bridge_config import Go1BridgeCfg
 
+
 # wrappers
 from mqe.envs.wrappers.empty_wrapper import EmptyWrapper
 from mqe.envs.wrappers.go1_gate_wrapper import Go1GateWrapper
@@ -30,6 +33,7 @@ from mqe.envs.wrappers.go1_tug_wrapper import Go1TugWrapper
 from mqe.envs.wrappers.go1_wrestling_wrapper import Go1WrestlingWrapper
 from mqe.envs.wrappers.go1_rotation_wrapper import Go1RotationWrapper
 from mqe.envs.wrappers.go1_bridge_wrapper import Go1BridgeWrapper
+
 
 from mqe.utils import get_args, make_env
 
@@ -110,7 +114,18 @@ ENV_DICT = {
         "class": Go1Object,
         "config": Go1FootballShootCfg,
         "wrapper": Go1FootballShootWrapper
-    }
+    },
+    # TODO: ------------------ go2 -------------------- 
+    # "go2football-defender":{
+    #     "class": ,
+    #     "config": ,
+    #     "wrapper": 
+    # },
+    # "go2football-shoot":{
+    #     "class": ,
+    #     "config": ,
+    #     "wrapper": 
+    # }
 }
 
 def make_mqe_env(env_name: str, args=None, custom_cfg=None) -> Tuple[LeggedRobotField, LeggedRobotFieldCfg]:
@@ -119,6 +134,7 @@ def make_mqe_env(env_name: str, args=None, custom_cfg=None) -> Tuple[LeggedRobot
 
     if callable(custom_cfg):
         env_dict["config"] = custom_cfg(env_dict["config"])
+        
     env, env_cfg = make_env(env_dict["class"], env_dict["config"], args)
     env = env_dict["wrapper"](env)
 

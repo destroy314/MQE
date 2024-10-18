@@ -5,6 +5,8 @@ import torch
 from copy import copy
 from mqe.envs.wrappers.empty_wrapper import EmptyWrapper
 
+# defender, game, shoot
+
 class Go1FootballDefenderWrapper(EmptyWrapper):
     '''
     num_agents: 2
@@ -142,7 +144,6 @@ class Go1FootballGameWrapper(EmptyWrapper):
 
     def _init_extras(self, obs):
         self.gate_pos = obs.env_info["gate_deviation"]
-        # breakpoint()
         self.gate_pos[:, 0] += self.BarrierTrack_kwargs["init"]["block_length"] + self.BarrierTrack_kwargs["gate"]["block_length"] / 2
         # self.gate_pos = self.gate_pos.unsqueeze(1).repeat(1, self.num_agents, 1)
         self.gate_distance = self.gate_pos.reshape(-1, 2)[:, 0]
@@ -162,14 +163,11 @@ class Go1FootballGameWrapper(EmptyWrapper):
         base_pos = obs_buf.base_pos  # (num_envs*num_agents, 3) 奇数时为agent1, 偶数时为agent2
         base_rpy = obs_buf.base_rpy  # (num_envs*num_agents, 3) 奇数时为agent1, 偶数时为agent2
         base_info = torch.cat([base_pos, base_rpy], dim=1).reshape([self.env.num_envs, self.env.num_agents, -1])[:, :2, :]  # (num_envs, num_agents, 6)
-        # breakpoint()
         obs = torch.cat([ball_pos, ball_vel, base_pos.reshape(self.num_envs, -1), base_rpy.reshape(self.num_envs, -1), self.gate_pos], dim=1)
         # (num_envs, 18) 缺少门的位置信息
-        # breakpoint()
         return obs
 
     def step(self, action):
-        # breakpoint()
         action = torch.clip(action, -1, 1)
         obs_buf, _, termination, info = self.env.step((action * self.action_scale).reshape(-1, self.action_space.shape[0]))
 
@@ -199,14 +197,6 @@ class Go1FootballGameWrapper(EmptyWrapper):
 
 class Go1FootballShootWrapper(EmptyWrapper):
     '''
-    go1football-2vs2:
-        num_agents: 4
-        Obs: shape (22,)
-        Action: shape (3,)
-    go1football-1vs1:
-        num_agents: 2
-        Obs: shape (20,)
-        Action: shape (3,)
     go1football-shoot:
         num_agents: 1
         Obs: shape ()
@@ -235,10 +225,10 @@ class Go1FootballShootWrapper(EmptyWrapper):
             "goal reward": 0,
             "step count": 0
         }
+        
 
     def _init_extras(self, obs):
         self.gate_pos = obs.env_info["gate_deviation"]
-        # breakpoint()
         self.gate_pos[:, 0] += self.BarrierTrack_kwargs["init"]["block_length"] + self.BarrierTrack_kwargs["gate"]["block_length"] / 2
         # self.gate_pos = self.gate_pos.unsqueeze(1).repeat(1, self.num_agents, 1)
         self.gate_distance = self.gate_pos.reshape(-1, 2)[:, 0]
@@ -258,10 +248,8 @@ class Go1FootballShootWrapper(EmptyWrapper):
         base_pos = obs_buf.base_pos  # (num_envs*num_agents, 3) 奇数时为agent1, 偶数时为agent2
         base_rpy = obs_buf.base_rpy  # (num_envs*num_agents, 3) 奇数时为agent1, 偶数时为agent2
         base_info = torch.cat([base_pos, base_rpy], dim=1).reshape([self.env.num_envs, self.env.num_agents, -1])[:, :2, :]  # (num_envs, num_agents, 6)
-        # breakpoint()
         obs = torch.cat([ball_pos, ball_vel, base_pos, base_rpy, self.gate_pos], dim=1)
         # (num_envs, 18) 缺少门的位置信息
-        # breakpoint()
         return obs
 
     def step(self, action):
@@ -280,11 +268,11 @@ class Go1FootballShootWrapper(EmptyWrapper):
         base_pos = obs_buf.base_pos
         base_rpy = obs_buf.base_rpy
         base_info = torch.cat([base_pos, base_rpy], dim=1).reshape([self.env.num_envs, self.env.num_agents, -1])[:, :2, :]
-
+        
         obs = torch.cat([ball_pos, ball_vel, base_pos, base_rpy], dim=1)
         # (num_envs, 18) 缺少门的位置信息
-
+        
         self.reward_buffer["step count"] += 1
         reward = torch.zeros([self.env.num_envs, 1], device=self.env.device)
-
-        return obs, reward.repeat(1, self.num_agents), termination, info
+        
+        return obs, reward, termination, info

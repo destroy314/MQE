@@ -26,7 +26,6 @@ if __name__ == '__main__':
 
     env, env_cfg = make_mqe_env(task_name, args, custom_cfg(args))
     env.reset()
-    # breakpoint()
     action_sample = torch.tensor(env.action_space.sample())
     
     step = 0

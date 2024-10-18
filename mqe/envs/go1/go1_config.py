@@ -249,27 +249,27 @@ class Go1Cfg(LeggedRobotFieldCfg):
     class obs:
 
         class cfgs:   # 用于指示在观测中是否包含特定的传感器数据或信息
-            base_pos = True
-            base_quat = True
-            dof_pos = True
-            dof_vel = True
-            lin_vel = True
-            ang_vel = True
-            projected_gravity = True
-            base_rpy = True
-            contact_states = False
+            base_pos = True                 # 3
+            base_quat = True                # 4
+            dof_pos = True                  # 12
+            dof_vel = True                  # 12
+            lin_vel = True                  # 3
+            ang_vel = True                  # 3
+            projected_gravity = True        # 3
+            base_rpy = True                 # 3
+            contact_states = False         
             command = True
             height_command = False
             gait_commands = False
             timing_parameter = False
             clock_inputs = False
-            last_action = True
-            last_last_action = True
+            last_action = True              # 12
+            last_last_action = True         # 12
             imu = False
 
             depth_image = False
             rgb_image = False
-            env_info = True
+            env_info = True                 # 'gate_deviation': 2  门偏差
         
         class scales:   # 用于对不同类型的观测数据进行缩放
             base_pos = 1.0

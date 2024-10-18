@@ -55,7 +55,6 @@ class Go1Object(Go1):
     def _create_npc(self, env_handle, env_id):
 
         npc_handles = []
-        # breakpoint()
         for i in range(self.num_npcs):
             pos = self.env_origins[env_id].clone()
             self.start_pose_npc.p = gymapi.Vec3(*pos)

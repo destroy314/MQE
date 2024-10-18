@@ -506,7 +506,6 @@ class BarrierTrack:
         self.build_heightfield_raw()          # create border (height, perlin noise)
         self.initialize_track_info_buffer()
 
-        # breakpoint()
 
         """ The track grid is defined as follow
           +y^

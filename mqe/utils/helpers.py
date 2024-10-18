@@ -252,14 +252,32 @@ def make_env(task_class, env_cfg, args=None):
     # parse sim params (convert to dict first)
     sim_params = {"sim": class_to_dict(env_cfg.sim)}
     sim_params = parse_sim_params(args, sim_params)
-    print(env_cfg)
+    # print(env_cfg)
     env = task_class(   cfg=env_cfg,
                         sim_params=sim_params,
                         physics_engine=args.physics_engine,
                         sim_device=args.sim_device,
                         headless=args.headless  )
+    from pprint import pprint
+    print("---------------------- args -----------------------")
+    pprint(args)
+    print("---------------------- env_cfg --------------------")
+    print_class_attributes(env_cfg)
+    print("---------------------------------------------------")
     return env, env_cfg
 
+def print_class_attributes(cls, indent=0):
+    for attr_name in dir(cls):
+        attr_value = getattr(cls, attr_name)
+        if not attr_name.startswith("__"):
+            if isinstance(attr_value, type):
+                # Print the class name and recursively print its attributes
+                print(" " * indent + f"Class: {attr_name}")
+                print_class_attributes(attr_value, indent + 4)
+            else:
+                # Print the attribute
+                print(" " * indent + f"{attr_name}: {attr_value}")
+                
 class Sensor:
     def __init__(self, env):
         self.env = env

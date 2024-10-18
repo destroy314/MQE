@@ -36,7 +36,6 @@ class Go1(LeggedRobotField):
             self._prepare_locomotion_policy()
 
     def step(self, action):
-
         if self.cfg.control.control_type == "C":  # this fork
             action = torch.clip(action, -1, 1)
             action = self.preprocess_action(action)   # 将action转换为locomotion_action
