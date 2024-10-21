@@ -315,6 +315,7 @@ class Go1FootballShootCfg(Go1Cfg):
     class init_state(Go1Cfg.init_state):
         multi_init_state = True
         init_state_class = Go1Cfg.init_state
+        # 相对于agent_origin的位置设定的: (2.0, 5.5. 0.0)        
         init_states = [
             init_state_class(
                 pos = [3.0, 0.0, 0.42],   # TODO:    default [3.0, 0.0, 0.42]
@@ -323,6 +324,7 @@ class Go1FootballShootCfg(Go1Cfg):
                 ang_vel = [0.0, 0.0, 0.0],
             ),
         ]
+        # 相对于env_origin的位置设定的: (1.0, 5.5. 0.0)
         init_states_npc = [
             init_state_class(
                 pos = [7.0, 0.0, 0.2],     # TODO:    default [7.0, 0.0, 0.2]
@@ -344,8 +346,8 @@ class Go1FootballShootCfg(Go1Cfg):
 
     class domain_rand(Go1Cfg.domain_rand):
         init_base_pos_range = dict(
-            x= [-0.1, 0.1],
-            y= [-0.1, 0.1],
+            x= [-2.0, 2.0],    # default: [-0.1, 0.1]
+            y= [-2.0, 2.0],    # default: [-0.1, 0.1]
         )
 
     class rewards(Go1Cfg.rewards):

@@ -56,6 +56,7 @@ if __name__ == '__main__':
     env, env_cfg = make_mqe_env(task_name, args, custom_cfg(args))
     if args.record_video:
         env.start_recording()
+        
     env.reset()
     action_sample = torch.tensor(env.action_space.sample())
     while True:
@@ -63,7 +64,7 @@ if __name__ == '__main__':
         #                         dtype=torch.float32, device="cuda").repeat(env.num_envs, 1, 1))
         # obs, _, done, _ = env.step(0 * torch.tensor([[[1, 0, 0],[1, 0, 0],],],
         #                         dtype=torch.float32, device="cuda").repeat(env.num_envs, 1, 1))
-        obs, _, done, _ = env.step(torch.randn_like(action_sample, dtype=torch.float32, device="cuda").repeat(env.num_envs, env.num_agents, 1))
+        obs, reward, done, info = env.step(torch.randn_like(action_sample, dtype=torch.float32, device="cuda").repeat(env.num_envs, env.num_agents, 1))
         # obs, _, done, _ = env.step(torch.tensor([0.0, -1.0, 0.0], dtype=torch.float32, device="cuda").repeat(env.num_envs, env.num_agents, 1))
         
         # if done.tolist()[0]:
