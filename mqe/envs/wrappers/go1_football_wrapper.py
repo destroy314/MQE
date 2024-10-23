@@ -350,8 +350,15 @@ class Go1FootballShootWrapper(EmptyWrapper):
         delta_ball_goal = 2.0
         _rew_ball_goal = torch.exp(-delta_ball_goal * ball_goal_error)
         
-        # TODO: reward_dribbling_robot_ball_yaw: 鼓励机器狗的朝向与球的朝向一致
-        
+        # reward_dribbling_robot_ball_yaw: 鼓励机器狗的朝向与球的朝向一致
+        roll, pitch, yaw = get_euler_xyz(base_quat)
+        body_yaw_vec = torch.zeros(self.num_envs, 2, device=self.device)
+        body_yaw_vec[:, 0] = torch.cos(yaw)
+        body_yaw_vec[:, 1] = torch.sin(yaw)
+        robot_ball_body_yaw_error = torch.norm(body_yaw_vec, dim=-1) - torch.sum(d_robot_ball * body_yaw_vec, dim=-1)
+
+        delta_dribbling_robot_ball_cmd_yaw = 2.0
+        _rew_robot_ball_yaw = torch.exp(-delta_dribbling_robot_ball_cmd_yaw * robot_ball_body_yaw_error)
         
         reward = _rew_goal * 100 +\
                  _rew_robot_ball_vel * 5 +\
@@ -359,6 +366,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
                  _rew_ball_goal * 10 +\
                  _rew_robot_ball_goal * 3 +\
                  _rew_ball_to_goal * 10 +\
+                 _rew_robot_ball_yaw * 3 + \
                  -self.reward_buffer["step count"] * 0.01
                 
         return obs, reward, termination, info
