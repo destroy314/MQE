@@ -1,6 +1,7 @@
 import os
 import random
 import time
+from datetime import datetime
 from dataclasses import dataclass
 
 import gym
@@ -9,7 +10,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import tyro
+# import tyro
 from torch.distributions.normal import Normal
 from torch.utils.tensorboard import SummaryWriter
 from mqe.utils import get_args
@@ -17,7 +18,8 @@ from mqe.envs.utils import make_mqe_env, custom_cfg
 
 @dataclass
 class Args:
-    exp_name: str = os.path.basename(__file__)[: -len(".py")]
+    # exp_name: str = os.path.basename(__file__)[: -len(".py")]
+    exp_name: str = "PPO"
     """the name of this experiment"""
     seed: int = 1
     """seed of the experiment"""
@@ -27,21 +29,21 @@ class Args:
     """if toggled, cuda will be enabled by default"""
     track: bool = False
     """if toggled, this experiment will be tracked with Weights and Biases"""
-    wandb_project_name: str = "cleanRL"
+    wandb_project_name: str = "MQE_shoot"
     """the wandb's project name"""
-    wandb_entity: str = None
+    wandb_entity: str = "xander2077"
     """the entity (team) of wandb's project"""
     capture_video: bool = False
     """whether to capture videos of the agent performances (check out `videos` folder)"""
 
     # Algorithm specific arguments
-    env_id: str = "Ant"
+    # env_id: str = "Ant"
     """the id of the environment"""
     total_timesteps: int = 30000000
     """total timesteps of the experiments"""
     learning_rate: float = 0.0026
     """the learning rate of the optimizer"""
-    num_envs: int = 4096
+    num_envs: int = 10     # TODO: default 4096
     """the number of parallel game environments"""
     num_steps: int = 16
     """the number of steps to run in each environment per policy rollout"""
@@ -100,7 +102,8 @@ class RecordEpisodeStatisticsTorch(gym.Wrapper):
         return observations
 
     def step(self, action):
-        observations, rewards, dones, infos = super().step(action)
+        observations, rewards, dones, infos = super().step(action.unsqueeze(1))
+        dones = dones.int()
         self.episode_returns += rewards
         self.episode_lengths += 1
         self.returned_episode_returns[:] = self.episode_returns
@@ -161,12 +164,14 @@ class ExtractObsWrapper(gym.ObservationWrapper):
 
 
 if __name__ == "__main__":
+    task_name = "go1football-shoot"
+    
     # args = tyro.cli(Args)
     args = Args()
     args.batch_size = int(args.num_envs * args.num_steps)
     args.minibatch_size = int(args.batch_size // args.num_minibatches)
     args.num_iterations = args.total_timesteps // args.batch_size
-    run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
+    run_name = f"{task_name}-{args.exp_name}-{args.seed}-{datetime.now()}"
     if args.track:
         import wandb
 
@@ -194,31 +199,37 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
 
     # env setup
-    envs = isaacgymenvs.make(
-        seed=args.seed,
-        task=args.env_id,
-        num_envs=args.num_envs,
-        sim_device="cuda:0" if torch.cuda.is_available() and args.cuda else "cpu",
-        rl_device="cuda:0" if torch.cuda.is_available() and args.cuda else "cpu",
-        graphics_device_id=0 if torch.cuda.is_available() and args.cuda else -1,
-        headless=False if torch.cuda.is_available() and args.cuda else True,
-        multi_gpu=False,
-        virtual_screen_capture=args.capture_video,
-        force_render=False,
-    )
+    # envs = isaacgymenvs.make(
+    #     seed=args.seed,
+    #     task=args.env_id,
+    #     num_envs=args.num_envs,
+    #     sim_device="cuda:0" if torch.cuda.is_available() and args.cuda else "cpu",
+    #     rl_device="cuda:0" if torch.cuda.is_available() and args.cuda else "cpu",
+    #     graphics_device_id=0 if torch.cuda.is_available() and args.cuda else -1,
+    #     headless=False if torch.cuda.is_available() and args.cuda else True,
+    #     multi_gpu=False,
+    #     virtual_screen_capture=args.capture_video,
+    #     force_render=False,
+    # )
+    env_args = get_args()
+    env_args.num_envs = args.num_envs
+    env_args.headless = True
+    env_args.record_video = False
+    envs, _ = make_mqe_env(task_name, env_args, custom_cfg(env_args))
+    if env_args.record_video:
+        envs.start_recording()
     
+    # if args.capture_video:
+    #     envs.is_vector_env = True
+    #     print(f"record_video_step_frequency={args.record_video_step_frequency}")
+    #     envs = gym.wrappers.RecordVideo(
+    #         envs,
+    #         f"videos/{run_name}",
+    #         step_trigger=lambda step: step % args.record_video_step_frequency == 0,
+    #         video_length=100,  # for each video record up to 100 steps
+    #     )
     
-    
-    if args.capture_video:
-        envs.is_vector_env = True
-        print(f"record_video_step_frequency={args.record_video_step_frequency}")
-        envs = gym.wrappers.RecordVideo(
-            envs,
-            f"videos/{run_name}",
-            step_trigger=lambda step: step % args.record_video_step_frequency == 0,
-            video_length=100,  # for each video record up to 100 steps
-        )
-    envs = ExtractObsWrapper(envs)
+    # envs = ExtractObsWrapper(envs)
     envs = RecordEpisodeStatisticsTorch(envs, device)
     envs.single_action_space = envs.action_space
     envs.single_observation_space = envs.observation_space

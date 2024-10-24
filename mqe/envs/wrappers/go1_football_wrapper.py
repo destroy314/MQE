@@ -206,7 +206,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
     def __init__(self, env):
         super().__init__(env)
 
-        self.observation_space = spaces.Box(low=-float('inf'), high=float('inf'), shape=(18 + self.num_agents,), dtype=float)
+        self.observation_space = spaces.Box(low=-float('inf'), high=float('inf'), shape=(9,), dtype=float)
         self.action_space = spaces.Box(low=-1, high=1, shape=(3,), dtype=float)
         self.action_scale = torch.tensor([[[2, 0.5, 0.5],],], device="cuda").repeat(self.num_envs, self.num_agents, 1)
 
@@ -281,6 +281,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
             reward_dribbling_robot_ball_yaw: 鼓励机器狗的朝向与球的朝向一致
             
         """
+        # breakpoint()
         action = torch.clip(action, -1, 1)
         obs_buf, _, termination, info = self.env.step((action * self.action_scale).reshape(-1, self.action_space.shape[0]))
         
@@ -310,7 +311,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
         self.reward_buffer["step count"] += 1
         
         reward = torch.zeros([self.env.num_envs, 1], device=self.device)
-                
+
         # reward_goal
         _rew_goal = torch.where(ball_pos[:, 0] > self.gate_pos[:, 0], 1.0, 0.0).unsqueeze(1)
         
@@ -325,7 +326,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
         robot_ball_goal_error = torch.norm(d_robot_ball, dim=-1) - torch.sum(d_robot_ball * d_ball_goal, dim=-1)
         
         delta_robot_ball_goal = 2.0
-        _rew_robot_ball_goal = torch.exp(-delta_robot_ball_goal * robot_ball_goal_error)
+        _rew_robot_ball_goal = torch.exp(-delta_robot_ball_goal * robot_ball_goal_error).unsqueeze(1)
         
         # reward_dribbling_robot_ball_vel: encourage robot velocity align vector from robot body to ball
         d_base_lin_vel_2d = base_lin_vel_2d / torch.norm(base_lin_vel_2d, dim=-1, keepdim=True)
@@ -333,7 +334,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
         robot_ball_vel_error = torch.norm(d_base_lin_vel_2d, dim=-1) - torch.sum(d_base_lin_vel_2d * d_robot_ball, dim=-1)
         
         delta_robot_ball_vel = 2.0
-        _rew_robot_ball_vel = torch.exp(-delta_robot_ball_vel * robot_ball_vel_error)
+        _rew_robot_ball_vel = torch.exp(-delta_robot_ball_vel * robot_ball_vel_error).unsqueeze(1)
         
         # reward_dribbling_robot_ball_pos: encourage robot near ball
         _rew_robot_ball_pos = torch.norm(robot_ball_vec, dim=-1, keepdim=True)
@@ -348,7 +349,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
         ball_goal_error = torch.norm(d_ball_vel_2d, dim=-1) - torch.sum(d_ball_vel_2d * d_ball_goal, dim=-1)
         
         delta_ball_goal = 2.0
-        _rew_ball_goal = torch.exp(-delta_ball_goal * ball_goal_error)
+        _rew_ball_goal = torch.exp(-delta_ball_goal * ball_goal_error).unsqueeze(1)
         
         # reward_dribbling_robot_ball_yaw: 鼓励机器狗的朝向与球的朝向一致
         roll, pitch, yaw = get_euler_xyz(base_quat)
@@ -358,7 +359,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
         robot_ball_body_yaw_error = torch.norm(body_yaw_vec, dim=-1) - torch.sum(d_robot_ball * body_yaw_vec, dim=-1)
 
         delta_dribbling_robot_ball_cmd_yaw = 2.0
-        _rew_robot_ball_yaw = torch.exp(-delta_dribbling_robot_ball_cmd_yaw * robot_ball_body_yaw_error)
+        _rew_robot_ball_yaw = torch.exp(-delta_dribbling_robot_ball_cmd_yaw * robot_ball_body_yaw_error).unsqueeze(1)
         
         reward = _rew_goal * 100 +\
                  _rew_robot_ball_vel * 5 +\
@@ -366,7 +367,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
                  _rew_ball_goal * 10 +\
                  _rew_robot_ball_goal * 3 +\
                  _rew_ball_to_goal * 10 +\
-                 _rew_robot_ball_yaw * 3 + \
-                 -self.reward_buffer["step count"] * 0.01
+                 _rew_robot_ball_yaw * 3
+                #  -self.reward_buffer["step count"] * 0.01
                 
-        return obs, reward, termination, info
+        return obs, reward.squeeze(), termination, info
