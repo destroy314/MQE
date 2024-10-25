@@ -281,7 +281,6 @@ class Go1FootballShootWrapper(EmptyWrapper):
             reward_dribbling_robot_ball_yaw: 鼓励机器狗的朝向与球的朝向一致
             
         """
-        # breakpoint()
         action = torch.clip(action, -1, 1)
         obs_buf, _, termination, info = self.env.step((action * self.action_scale).reshape(-1, self.action_space.shape[0]))
         
@@ -314,6 +313,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
 
         # reward_goal
         _rew_goal = torch.where(ball_pos[:, 0] > self.gate_pos[:, 0], 1.0, 0.0).unsqueeze(1)
+        info["goal"] = _rew_goal.bool().squeeze()
         
         # reward_robot_ball_goal: 鼓励机器狗，球，球门三者在一条直线上
         robot_ball_vec = (ball_pos - base_pos)[..., :2]
@@ -361,7 +361,8 @@ class Go1FootballShootWrapper(EmptyWrapper):
         delta_dribbling_robot_ball_cmd_yaw = 2.0
         _rew_robot_ball_yaw = torch.exp(-delta_dribbling_robot_ball_cmd_yaw * robot_ball_body_yaw_error).unsqueeze(1)
         
-        reward = _rew_goal * 100 +\
+        # TODO: 增加关于时间的递减项
+        reward = _rew_goal * 1000 +\
                  _rew_robot_ball_vel * 5 +\
                  _rew_robot_ball_pos * 5 +\
                  _rew_ball_goal * 10 +\
@@ -369,5 +370,11 @@ class Go1FootballShootWrapper(EmptyWrapper):
                  _rew_ball_to_goal * 10 +\
                  _rew_robot_ball_yaw * 3
                 #  -self.reward_buffer["step count"] * 0.01
-                
+
+        """
+        info: {
+            'goal': tensor([num_envs, ], dtype=torch.bool),
+            'time_outs': tensor([num_envs, ], dtype=torch.bool),
+        }
+        """
         return obs, reward.squeeze(), termination, info
