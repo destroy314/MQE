@@ -21,7 +21,7 @@ class Args:
     # exp_name: str = os.path.basename(__file__)[: -len(".py")]
     exp_name: str = "PPO"
     """the name of this experiment"""
-    seed: int = 1
+    seed: int = 42
     """seed of the experiment"""
     torch_deterministic: bool = True
     """if toggled, `torch.backends.cudnn.deterministic=False`"""
@@ -39,13 +39,13 @@ class Args:
     # Algorithm specific arguments
     # env_id: str = "Ant"
     """the id of the environment"""
-    total_timesteps: int = 30000000
+    total_timesteps: int = 600000000
     """total timesteps of the experiments"""
     learning_rate: float = 0.0026
     """the learning rate of the optimizer"""
-    num_envs: int = 10     # TODO: default 4096
+    num_envs: int = 2000     # TODO: default 4096
     """the number of parallel game environments"""
-    num_steps: int = 16
+    num_steps: int = 8
     """the number of steps to run in each environment per policy rollout"""
     anneal_lr: bool = False
     """Toggle learning rate annealing for policy and value networks"""
@@ -53,9 +53,9 @@ class Args:
     """the discount factor gamma"""
     gae_lambda: float = 0.95
     """the lambda for the general advantage estimation"""
-    num_minibatches: int = 2
+    num_minibatches: int = 4
     """the number of mini-batches"""
-    update_epochs: int = 4
+    update_epochs: int = 5
     """the K epochs to update the policy"""
     norm_adv: bool = True
     """Toggles advantages normalization"""
@@ -158,9 +158,9 @@ class Agent(nn.Module):
         return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(x)
 
 
-class ExtractObsWrapper(gym.ObservationWrapper):
-    def observation(self, obs):
-        return obs["obs"]
+# class ExtractObsWrapper(gym.ObservationWrapper):
+#     def observation(self, obs):
+#         return obs["obs"]
 
 
 if __name__ == "__main__":
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     torch.manual_seed(args.seed)
     torch.backends.cudnn.deterministic = args.torch_deterministic
 
-    device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
+    device = torch.device("cuda:1" if torch.cuda.is_available() and args.cuda else "cpu")
 
     # env setup
     # envs = isaacgymenvs.make(
@@ -213,6 +213,8 @@ if __name__ == "__main__":
     # )
     env_args = get_args()
     env_args.num_envs = args.num_envs
+    env_args.rl_device = "cuda:1"
+    env_args.sim_device = "cuda:1"
     env_args.headless = True
     env_args.record_video = False
     envs, _ = make_mqe_env(task_name, env_args, custom_cfg(env_args))
