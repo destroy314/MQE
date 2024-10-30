@@ -364,7 +364,11 @@ class Go1FootballShootWrapper(EmptyWrapper):
         delta_dribbling_robot_ball_cmd_yaw = 2.0
         _rew_robot_ball_yaw = torch.exp(-delta_dribbling_robot_ball_cmd_yaw * robot_ball_body_yaw_error).unsqueeze(1)
         
-        # TODO: 增加关于时间的递减项
+        # TODO: 
+        # 1. 增加关于时间的递减项
+        # 2. 将reward_scale放入config文件中，并用dict调用
+        # 3. 将 reward 放入log中
+        # 4. 重命名 reward
         reward = _rew_goal * 1000 +\
                  _rew_robot_ball_vel * 5 +\
                  _rew_robot_ball_pos * 5 +\
@@ -380,6 +384,10 @@ class Go1FootballShootWrapper(EmptyWrapper):
             'time_outs': tensor([num_envs, ], dtype=torch.bool),
         }
         """
+        info["rew"] = {}
+        
+        
+        
         return obs, reward.squeeze(), termination, info
     
     def get_observations(self):

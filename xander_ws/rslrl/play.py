@@ -2,19 +2,16 @@ from __future__ import annotations
 
 import numpy as np
 import os, re
-from datetime import datetime
 import isaacgym
 from mqe.utils import get_args
 from mqe.envs.utils import make_mqe_env, custom_cfg
 from mqe.utils.helpers import update_cfg_from_args, class_to_dict, get_load_path
 import torch
 from rsl_rl.env import VecEnv
-from rsl_rl.runners import OnPolicyRunner
 import sys
 sys.path.append("..")
 from rslrl.config.train_cfg import LeggedRobotCfgPPO
 from rslrl import RSLRL_ROOT_DIR
-from rsl_rl.algorithms import PPO
 from rsl_rl.modules import ActorCritic, ActorCriticRecurrent, EmpiricalNormalization
 
 from tqdm import tqdm

@@ -15,6 +15,7 @@ from rsl_rl.algorithms import PPO
 from rsl_rl.env import VecEnv
 from rsl_rl.modules import ActorCritic, ActorCriticRecurrent, EmpiricalNormalization
 from rsl_rl.utils import store_code_state
+from mqe.utils.helpers import class_to_dict
 from copy import deepcopy
 import yaml
 
@@ -88,11 +89,13 @@ class OnPolicyRunner:
                 from rsl_rl.utils.wandb_utils import WandbSummaryWriter
 
                 self.writer = WandbSummaryWriter(log_dir=self.log_dir, flush_secs=10, cfg=self.cfg)
-                self.writer.log_config(self.env.cfg, self.cfg, self.alg_cfg, self.policy_cfg)
+                self.writer.log_config(class_to_dict(self.env.cfg), self.cfg, self.alg_cfg, self.policy_cfg)
             elif self.logger_type == "tensorboard":
                 self.writer = TensorboardSummaryWriter(log_dir=self.log_dir, flush_secs=10)
-                with open(os.path.join(self.log_dir, "config.yaml"), "w") as f:
+                with open(os.path.join(self.log_dir, "ppo_cfg.yaml"), "w") as f:
                     yaml.dump(self.total_cfg, f, default_flow_style=False)
+                with open(os.path.join(self.log_dir, "env_cfg.yaml"), "w") as f:
+                    yaml.dump(class_to_dict(self.env.cfg), f, default_flow_style=False)
             else:
                 raise AssertionError("logger type not found")
 
