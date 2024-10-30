@@ -349,6 +349,7 @@ class Go1FootballShootCfg(Go1Cfg):
 
     class rewards(Go1Cfg.rewards):
         class scales:
+            # TODO: add more scales
             goal_reward_scale = 1
             
             

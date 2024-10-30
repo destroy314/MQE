@@ -5,6 +5,7 @@ import torch
 from copy import copy
 from mqe.envs.wrappers.empty_wrapper import EmptyWrapper
 from isaacgym.torch_utils import *
+from mqe.utils.helpers import class_to_dict
 
 # defender, game, shoot
 
@@ -365,10 +366,10 @@ class Go1FootballShootWrapper(EmptyWrapper):
         _rew_robot_ball_yaw = torch.exp(-delta_dribbling_robot_ball_cmd_yaw * robot_ball_body_yaw_error).unsqueeze(1)
         
         # TODO: 
-        # 1. 增加关于时间的递减项
-        # 2. 将reward_scale放入config文件中，并用dict调用
-        # 3. 将 reward 放入log中
-        # 4. 重命名 reward
+        # 1. 增加关于时间的递减项，使得机器狗越早进球奖励越高
+        # 2. 将 reward_scale 放入 Go1FootballShootCfg.rewards 中，并用 class_to_dict 转成 dict 调用
+        # 3. 将 reward 的信息放入info["rew"]中
+        # 4. 重命名 reward，使其更加直观
         reward = _rew_goal * 1000 +\
                  _rew_robot_ball_vel * 5 +\
                  _rew_robot_ball_pos * 5 +\
