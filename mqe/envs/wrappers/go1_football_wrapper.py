@@ -370,6 +370,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
         # 2. 将 reward_scale 放入 Go1FootballShootCfg.rewards 中，并用 class_to_dict 转成 dict 调用
         # 3. 将 reward 的信息放入info["rew"]中
         # 4. 重命名 reward，使其更加直观
+        # 5. 可以参考 dribblebot 的配置方法
         reward = _rew_goal * 1000 +\
                  _rew_robot_ball_vel * 5 +\
                  _rew_robot_ball_pos * 5 +\
