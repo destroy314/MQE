@@ -221,14 +221,21 @@ class Go1FootballShootWrapper(EmptyWrapper):
         # self.agent_distance_punishment_scale = 0
         # self.lin_vel_y_punishment_scale = 0
         # self.command_value_punishment_scale = 0
+        
+        if getattr(self, "gate_pos", None) is None:
+            # self._init_extras(obs_buf)
+            self.gate_pos = torch.zeros([self.num_envs, 3], device=self.device)
+            self.gate_pos[:, 0] = 12.0
+            self.gate_pos[:, 1] = 0.0
+            self.gate_pos[:, 2] = 0.0
 
         self.reward_buffer = {
             "goal reward": 0,
             "step count": 0
         }
         
-
     def _init_extras(self, obs):
+        """deprecated"""
         self.gate_pos = obs.env_info["gate_deviation"]
         self.gate_pos[:, 0] += self.BarrierTrack_kwargs["init"]["block_length"] + self.BarrierTrack_kwargs["gate"]["block_length"] / 2
         # self.gate_pos = self.gate_pos.unsqueeze(1).repeat(1, self.num_agents, 1)
@@ -236,14 +243,10 @@ class Go1FootballShootWrapper(EmptyWrapper):
 
     def reset(self):
         obs_buf = self.env.reset()
-
-        if getattr(self, "gate_pos", None) is None:
-            # self._init_extras(obs_buf)
-            self.gate_pos = torch.zeros([self.num_envs, 3], device=self.device)
-            self.gate_pos[:, 0] = 12.0
-            self.gate_pos[:, 1] = 0.0
-            self.gate_pos[:, 2] = 0.0
         
+        # if getattr(self, "gate_pos", None) is None:
+            # self._init_extras(obs_buf)
+            
         base_pos = obs_buf.base_pos
         base_quat = obs_buf.base_quat
         base_lin_vel = obs_buf.lin_vel
@@ -281,7 +284,7 @@ class Go1FootballShootWrapper(EmptyWrapper):
             reward_dribbling_robot_ball_yaw: 鼓励机器狗的朝向与球的朝向一致
             
         """
-        action = torch.clip(action, -1, 1)
+        action = torch.clip(action, -1, 1).unsqueeze(1)
         obs_buf, _, termination, info = self.env.step((action * self.action_scale).reshape(-1, self.action_space.shape[0]))
         
         # if getattr(self, "gate_pos", None) is None:
@@ -378,3 +381,27 @@ class Go1FootballShootWrapper(EmptyWrapper):
         }
         """
         return obs, reward.squeeze(), termination, info
+    
+    def get_observations(self):
+        self.env.compute_observations()
+        obs_buf = self.env.get_observations()
+
+        base_pos = obs_buf.base_pos
+        base_quat = obs_buf.base_quat
+        base_lin_vel = obs_buf.lin_vel
+        base_ang_vel = obs_buf.ang_vel
+        
+        # self.root_states_npc: position([0:3]), rotation([3:7]), linear velocity([7:10]), and angular velocity([10:13])
+        ball_pos = self.root_states_npc[:, :3].reshape(self.num_envs, 3) - self.env_origins
+        ball_vel = self.root_states_npc[:, 7:10].reshape(self.num_envs, 3)
+        
+        base_lin_vel_2d = base_lin_vel[:, :2]
+        base_vel_yaw = base_ang_vel[:, 2].unsqueeze(1)
+        
+        ball_pos_ego = quat_rotate(quat_conjugate(base_quat) , ball_pos - base_pos)[..., :2]
+        ball_vel_ego = quat_rotate(quat_conjugate(base_quat) , ball_vel - base_lin_vel)[..., :2]
+        goal_pos_ego = quat_rotate(quat_conjugate(base_quat) , self.gate_pos - base_pos)[..., :2]
+        
+        obs = torch.cat([base_lin_vel_2d, base_vel_yaw, ball_pos_ego, ball_vel_ego, goal_pos_ego], dim=1)
+        
+        return obs

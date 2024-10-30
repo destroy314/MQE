@@ -1,0 +1,43 @@
+{
+  "os":  "Linux-5.15.0-91-generic-x86_64-with-glibc2.17",
+  "python":  "3.8.20",
+  "startedAt":  "2024-10-29T14:55:07.119911Z",
+  "program":  "train.py",
+  "codePath":  "xander_ws/rslrl/train.py",
+  "git":  {
+    "remote":  "git@github.com:xander-2077/MQE.git",
+    "commit":  "ba8e923859f17a30192c6cd0ee163a6609b14f82"
+  },
+  "email":  "1073692867@qq.com",
+  "root":  "/home/xander/Codes/IsaacGym/MQE/xander_ws/rslrl",
+  "host":  "xander-lab",
+  "username":  "xander",
+  "executable":  "/home/xander/anaconda3/envs/MQE/bin/python",
+  "codePathLocal":  "train.py",
+  "cpu_count":  6,
+  "cpu_count_logical":  12,
+  "gpu":  "NVIDIA GeForce RTX 3060",
+  "gpu_count":  1,
+  "disk":  {
+    "/":  {
+      "total":  "125690249216",
+      "used":  "55379386368"
+    }
+  },
+  "memory":  {
+    "total":  "33474269184"
+  },
+  "cpu":  {
+    "count":  6,
+    "countLogical":  12
+  },
+  "gpu_nvidia":  [
+    {
+      "name":  "NVIDIA GeForce RTX 3060",
+      "memoryTotal":  "12884901888",
+      "cudaCores":  3584,
+      "architecture":  "Ampere"
+    }
+  ],
+  "cudaVersion":  "12.2"
+}

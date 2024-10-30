@@ -56,7 +56,6 @@ if __name__ == '__main__':
     env, env_cfg = make_mqe_env(task_name, args, custom_cfg(args))
     if args.record_video:
         env.start_recording()
-        
     obs = env.reset()
     action_sample = torch.tensor(env.action_space.sample())
     while True:
@@ -66,7 +65,7 @@ if __name__ == '__main__':
         #                         dtype=torch.float32, device="cuda").repeat(env.num_envs, 1, 1))
         # breakpoint()
         obs, reward, done, info = env.step(torch.randn_like(action_sample, dtype=torch.float32, device="cuda").repeat(env.num_envs, env.num_agents, 1))
-        
+        breakpoint()
         # obs, reward, done, info = env.step(torch.randn_like(action_sample, dtype=torch.float32, device="cuda").repeat(args.num_envs, 1))  # something wrong
         
         # obs, _, done, _ = env.step(torch.tensor([0.0, -1.0, 0.0], dtype=torch.float32, device="cuda").repeat(env.num_envs, env.num_agents, 1))

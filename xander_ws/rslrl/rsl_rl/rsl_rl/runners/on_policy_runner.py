@@ -15,26 +15,31 @@ from rsl_rl.algorithms import PPO
 from rsl_rl.env import VecEnv
 from rsl_rl.modules import ActorCritic, ActorCriticRecurrent, EmpiricalNormalization
 from rsl_rl.utils import store_code_state
-
+from copy import deepcopy
 
 class OnPolicyRunner:
     """On-policy runner for training and evaluation."""
 
     def __init__(self, env: VecEnv, train_cfg, log_dir=None, device="cpu"):
-        self.cfg = train_cfg
+        self.cfg = train_cfg["runner"]
         self.alg_cfg = train_cfg["algorithm"]
         self.policy_cfg = train_cfg["policy"]
         self.device = device
         self.env = env
-        obs, extras = self.env.get_observations()
+        # obs, extras = self.env.get_observations()
+        obs = self.env.get_observations()
         num_obs = obs.shape[1]
-        if "critic" in extras["observations"]:
-            num_critic_obs = extras["observations"]["critic"].shape[1]
-        else:
-            num_critic_obs = num_obs
+        # if "critic" in extras["observations"]:
+        #     num_critic_obs = extras["observations"]["critic"].shape[1]
+        # else:
+        #     num_critic_obs = num_obs
+        num_critic_obs = num_obs
         actor_critic_class = eval(self.policy_cfg.pop("class_name"))  # ActorCritic
+        # actor_critic: ActorCritic | ActorCriticRecurrent = actor_critic_class(
+        #     num_obs, num_critic_obs, self.env.num_actions, **self.policy_cfg
+        # ).to(self.device)
         actor_critic: ActorCritic | ActorCriticRecurrent = actor_critic_class(
-            num_obs, num_critic_obs, self.env.num_actions, **self.policy_cfg
+            num_obs, num_critic_obs, self.env.action_space.shape[0], **self.policy_cfg
         ).to(self.device)
         alg_class = eval(self.alg_cfg.pop("class_name"))  # PPO
         self.alg: PPO = alg_class(actor_critic, device=self.device, **self.alg_cfg)
@@ -53,7 +58,8 @@ class OnPolicyRunner:
             self.num_steps_per_env,
             [num_obs],
             [num_critic_obs],
-            [self.env.num_actions],
+            # [self.env.num_actions],
+            [self.env.action_space.shape[0]],
         )
 
         # Log
@@ -90,8 +96,10 @@ class OnPolicyRunner:
             self.env.episode_length_buf = torch.randint_like(
                 self.env.episode_length_buf, high=int(self.env.max_episode_length)
             )
-        obs, extras = self.env.get_observations()
-        critic_obs = extras["observations"].get("critic", obs)
+        # obs, extras = self.env.get_observations()
+        obs = self.env.get_observations()
+        # critic_obs = extras["observations"].get("critic", obs)
+        critic_obs = deepcopy(obs)
         obs, critic_obs = obs.to(self.device), critic_obs.to(self.device)
         self.train_mode()  # switch to train mode (for dropout for example)
 
@@ -119,10 +127,11 @@ class OnPolicyRunner:
                     )
                     # perform normalization
                     obs = self.obs_normalizer(obs)
-                    if "critic" in infos["observations"]:
-                        critic_obs = self.critic_obs_normalizer(infos["observations"]["critic"])
-                    else:
-                        critic_obs = obs
+                    # if "critic" in infos["observations"]:
+                    #     critic_obs = self.critic_obs_normalizer(infos["observations"]["critic"])
+                    # else:
+                    #     critic_obs = obs
+                    critic_obs = obs
                     # process the step
                     self.alg.process_env_step(rewards, dones, infos)
 

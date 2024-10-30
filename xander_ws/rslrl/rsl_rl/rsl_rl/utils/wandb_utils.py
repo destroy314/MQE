@@ -24,12 +24,14 @@ class WandbSummaryWriter(SummaryWriter):
         except KeyError:
             raise KeyError("Please specify wandb_project in the runner config, e.g. legged_gym.")
 
-        try:
-            entity = os.environ["WANDB_USERNAME"]
-        except KeyError:
-            raise KeyError(
-                "Wandb username not found. Please run or add to ~/.bashrc: export WANDB_USERNAME=YOUR_USERNAME"
-            )
+        # try:
+        #     entity = os.environ["WANDB_USERNAME"]
+        # except KeyError:
+        #     raise KeyError(
+        #         "Wandb username not found. Please run or add to ~/.bashrc: export WANDB_USERNAME=YOUR_USERNAME"
+        #     )
+        
+        entity = cfg["wandb_entity"]
 
         wandb.init(project=project, entity=entity)
 

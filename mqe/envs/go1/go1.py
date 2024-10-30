@@ -26,7 +26,7 @@ class Go1(LeggedRobotField):
         self.env_name = cfg.env.env_name
         super().__init__(cfg, sim_params, physics_engine, sim_device, headless)
         
-        self.obs_buf = copy(self.cfg.obs)
+        self.obs_buf = copy(self.cfg.obs)   # todo: why?
         self.privileged_obs_buf = copy(self.cfg.privileged_obs)
 
         self.last_locomotion_action = torch.zeros(self.num_envs * self.num_agents, 12, dtype=torch.float, device=self.device, requires_grad=False)
@@ -59,7 +59,7 @@ class Go1(LeggedRobotField):
             self.post_decimation_step(dec_i)
 
         self.post_physics_step()
-        
+
         return self.obs_buf, self.rew_buf, self.reset_buf, self.extras
     
     def preprocess_action(self, actions):
@@ -367,7 +367,6 @@ class Go1(LeggedRobotField):
         self.lag_buffer = [torch.zeros_like(self.dof_pos, device=self.device) for i in range(self.cfg.domain_rand.lag_timesteps + 1)]
 
         if self.cfg.control.control_type == "actuator_net" or self.cfg.control.control_type == "C":
-
             actuator_network = torch.jit.load(self.cfg.control.actuator_network_path + "/unitree_go1.pt", map_location=self.device)   # 电机位置 to 扭矩
 
             def eval_actuator_network(joint_pos, joint_pos_last, joint_pos_last_last, joint_vel, joint_vel_last,

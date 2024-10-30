@@ -30,6 +30,8 @@
 
 from mqe.envs.base.legged_robot_config import LeggedRobotCfg
 from mqe.envs.field.legged_robot_field_config import LeggedRobotFieldCfg
+from mqe import LEGGED_GYM_ROOT_DIR
+
 
 class Go1Cfg(LeggedRobotFieldCfg):
 
@@ -119,8 +121,8 @@ class Go1Cfg(LeggedRobotFieldCfg):
         decimation = 4
         hip_scale_reduction = 0.5
 
-        locomotion_policy_dir = "./mqe/utils/locomotion_checkpoints/walk_these_ways"
-        actuator_network_path = "./resources/actuator_nets"
+        locomotion_policy_dir = f"{LEGGED_GYM_ROOT_DIR}/mqe/utils/locomotion_checkpoints/walk_these_ways"
+        actuator_network_path = f"{LEGGED_GYM_ROOT_DIR}/resources/actuator_nets"
 
         class default_command:
 
