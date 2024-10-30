@@ -30,7 +30,7 @@ class LeggedRobotCfgPPO(BaseConfig):
     runner_class_name = 'OnPolicyRunner'
     
     class policy:
-        class_name = 'ActorCritic'
+        class_name = 'ActorCritic'  # ActorCritic, ActorCriticRecurrent
         # for MLP i.e. `ActorCritic`
         init_noise_std = 1.0
         # actor_hidden_dims = [512, 256, 128]

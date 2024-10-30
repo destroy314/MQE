@@ -16,11 +16,13 @@ from rsl_rl.env import VecEnv
 from rsl_rl.modules import ActorCritic, ActorCriticRecurrent, EmpiricalNormalization
 from rsl_rl.utils import store_code_state
 from copy import deepcopy
+import yaml
 
 class OnPolicyRunner:
     """On-policy runner for training and evaluation."""
 
     def __init__(self, env: VecEnv, train_cfg, log_dir=None, device="cpu"):
+        self.total_cfg = train_cfg
         self.cfg = train_cfg["runner"]
         self.alg_cfg = train_cfg["algorithm"]
         self.policy_cfg = train_cfg["policy"]
@@ -89,6 +91,8 @@ class OnPolicyRunner:
                 self.writer.log_config(self.env.cfg, self.cfg, self.alg_cfg, self.policy_cfg)
             elif self.logger_type == "tensorboard":
                 self.writer = TensorboardSummaryWriter(log_dir=self.log_dir, flush_secs=10)
+                with open(os.path.join(self.log_dir, "config.yaml"), "w") as f:
+                    yaml.dump(self.total_cfg, f, default_flow_style=False)
             else:
                 raise AssertionError("logger type not found")
 
