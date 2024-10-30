@@ -246,7 +246,7 @@ class Go1Football1vs1Cfg(Go1Cfg):
         pos = [2., 2., 2.]  # [m]
         lookat = [6., 5., 0.]  # [m]
 
-# TODO: shoot config
+
 class Go1FootballShootCfg(Go1Cfg):
 
     class env(Go1Cfg.env):
@@ -265,9 +265,6 @@ class Go1FootballShootCfg(Go1Cfg):
         npc_gravity = True
     
     class terrain(Go1Cfg.terrain):
-        """
-        TODO: draw map
-        """
         num_rows = 1
         num_cols = 1
  
