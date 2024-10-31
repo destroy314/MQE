@@ -55,6 +55,8 @@ def class_to_dict(obj) -> dict:
         if isinstance(val, list):
             for item in val:
                 element.append(class_to_dict(item))
+        elif isinstance(val, torch.Tensor):
+            element = str(val.shape) + " " + str(val.dtype) # cannot convert back!
         else:
             element = class_to_dict(val)
         result[key] = element
