@@ -62,3 +62,5 @@ runs
 __pycache__
 
 .history
+
+wandb

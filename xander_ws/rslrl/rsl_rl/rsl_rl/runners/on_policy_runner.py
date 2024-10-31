@@ -94,9 +94,8 @@ class OnPolicyRunner:
                 self.writer = TensorboardSummaryWriter(log_dir=self.log_dir, flush_secs=10)
                 with open(os.path.join(self.log_dir, "ppo_cfg.yaml"), "w") as f:
                     yaml.dump(self.total_cfg, f, default_flow_style=False)
-                # with open(os.path.join(self.log_dir, "env_cfg.yaml"), "w") as f:
-                #     breakpoint()
-                #     yaml.dump(class_to_dict(self.env.cfg), f, default_flow_style=False)
+                with open(os.path.join(self.log_dir, "env_cfg.yaml"), "w") as f:
+                    yaml.dump(class_to_dict(self.env.cfg), f, default_flow_style=False)
             else:
                 raise AssertionError("logger type not found")
 
