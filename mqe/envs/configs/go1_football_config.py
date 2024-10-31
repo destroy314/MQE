@@ -349,15 +349,13 @@ class Go1FootballShootCfg(Go1Cfg):
 
     class rewards(Go1Cfg.rewards):
         class scales:
-            # TODO: add more scales
-            goal_reward_scale = 1
-            
-            
-            
-            
-            
-            
-            
+            goal = 1000
+            robot_ball_goal_pos = 3
+            robot_vel_to_ball = 5
+            robot_to_ball = 5
+            ball_to_goal = 10
+            ball_vel_to_goal = 10
+            robot_yaw_to_ball = 3
 
     class viewer(Go1Cfg.viewer):
         pos = [2., 2., 2.]  # [m]

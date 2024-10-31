@@ -316,10 +316,10 @@ class Go1FootballShootWrapper(EmptyWrapper):
         reward = torch.zeros([self.env.num_envs, 1], device=self.device)
 
         # reward_goal
-        _rew_goal = torch.where(ball_pos[:, 0] > self.gate_pos[:, 0], 1.0, 0.0).unsqueeze(1)
-        info["goal"] = _rew_goal.bool().squeeze()
+        reward_goal = torch.where(ball_pos[:, 0] > self.gate_pos[:, 0], 1.0, 0.0).unsqueeze(1)
+        info["goal"] = reward_goal.bool().squeeze()
         
-        # reward_robot_ball_goal: 鼓励机器狗，球，球门三者在一条直线上
+        # reward_robot_ball_goal_pos: 鼓励机器狗，球，球门三者在一条直线上
         robot_ball_vec = (ball_pos - base_pos)[..., :2]
         d_robot_ball = robot_ball_vec / torch.norm(robot_ball_vec, dim=-1, keepdim=True)
         d_robot_ball = torch.nan_to_num(d_robot_ball, nan=0.0)
@@ -330,55 +330,49 @@ class Go1FootballShootWrapper(EmptyWrapper):
         robot_ball_goal_error = torch.norm(d_robot_ball, dim=-1) - torch.sum(d_robot_ball * d_ball_goal, dim=-1)
         
         delta_robot_ball_goal = 2.0
-        _rew_robot_ball_goal = torch.exp(-delta_robot_ball_goal * robot_ball_goal_error).unsqueeze(1)
+        reward_robot_ball_goal_pos = torch.exp(-delta_robot_ball_goal * robot_ball_goal_error).unsqueeze(1)
         
-        # reward_dribbling_robot_ball_vel: encourage robot velocity align vector from robot body to ball
+        # reward_robot_vel_to_ball: 鼓励机器狗的速度朝向球
         d_base_lin_vel_2d = base_lin_vel_2d / torch.norm(base_lin_vel_2d, dim=-1, keepdim=True)
         d_base_lin_vel_2d = torch.nan_to_num(d_base_lin_vel_2d, nan=0.0)
         robot_ball_vel_error = torch.norm(d_base_lin_vel_2d, dim=-1) - torch.sum(d_base_lin_vel_2d * d_robot_ball, dim=-1)
         
         delta_robot_ball_vel = 2.0
-        _rew_robot_ball_vel = torch.exp(-delta_robot_ball_vel * robot_ball_vel_error).unsqueeze(1)
+        reward_robot_vel_to_ball = torch.exp(-delta_robot_ball_vel * robot_ball_vel_error).unsqueeze(1)
         
-        # reward_dribbling_robot_ball_pos: encourage robot near ball
-        _rew_robot_ball_pos = torch.norm(robot_ball_vec, dim=-1, keepdim=True)
+        # reward_robot_to_ball: 鼓励机器狗接近球
+        reward_robot_to_ball = torch.norm(robot_ball_vec, dim=-1, keepdim=True)
         
-        # reward_ball_to_goal: encourage ball near goal
-        _rew_ball_to_goal = torch.norm(ball_goal_vec, dim=-1, keepdim=True)
+        # reward_ball_to_goal: 鼓励球接近球门
+        reward_ball_to_goal = torch.norm(ball_goal_vec, dim=-1, keepdim=True)
         
-        # reward_dribbling_ball_vel: encourage ball vel align with unit vector between ball target(goal) and ball current position
+        # reward_ball_vel_to_goal: 鼓励球的速度朝向球门
         ball_vel_2d = ball_vel[..., :2]
         d_ball_vel_2d = ball_vel_2d / torch.norm(ball_vel_2d, dim=-1, keepdim=True)
         d_ball_vel_2d = torch.nan_to_num(d_ball_vel_2d, nan=0.0)
         ball_goal_error = torch.norm(d_ball_vel_2d, dim=-1) - torch.sum(d_ball_vel_2d * d_ball_goal, dim=-1)
         
         delta_ball_goal = 2.0
-        _rew_ball_goal = torch.exp(-delta_ball_goal * ball_goal_error).unsqueeze(1)
+        reward_ball_vel_to_goal = torch.exp(-delta_ball_goal * ball_goal_error).unsqueeze(1)
         
-        # reward_dribbling_robot_ball_yaw: 鼓励机器狗的朝向与球的朝向一致
-        roll, pitch, yaw = get_euler_xyz(base_quat)
+        # reward_robot_yaw_to_ball: 鼓励机器狗朝向球
+        _, _, yaw = get_euler_xyz(base_quat)
         body_yaw_vec = torch.zeros(self.num_envs, 2, device=self.device)
         body_yaw_vec[:, 0] = torch.cos(yaw)
         body_yaw_vec[:, 1] = torch.sin(yaw)
         robot_ball_body_yaw_error = torch.norm(body_yaw_vec, dim=-1) - torch.sum(d_robot_ball * body_yaw_vec, dim=-1)
 
         delta_dribbling_robot_ball_cmd_yaw = 2.0
-        _rew_robot_ball_yaw = torch.exp(-delta_dribbling_robot_ball_cmd_yaw * robot_ball_body_yaw_error).unsqueeze(1)
+        reward_robot_yaw_to_ball = torch.exp(-delta_dribbling_robot_ball_cmd_yaw * robot_ball_body_yaw_error).unsqueeze(1)
         
-        # TODO: 
-        # 1. 增加关于时间的递减项，使得机器狗越早进球奖励越高
-        # 2. 将 reward_scale 放入 Go1FootballShootCfg.rewards 中，并用 class_to_dict 转成 dict 调用
-        # 3. 将 reward 的信息放入info["rew"]中
-        # 4. 重命名 reward，使其更加直观
-        # 5. 可以参考 dribblebot 的配置方法
-        reward = _rew_goal * 1000 +\
-                 _rew_robot_ball_vel * 5 +\
-                 _rew_robot_ball_pos * 5 +\
-                 _rew_ball_goal * 10 +\
-                 _rew_robot_ball_goal * 3 +\
-                 _rew_ball_to_goal * 10 +\
-                 _rew_robot_ball_yaw * 3
-                #  -self.reward_buffer["step count"] * 0.01
+        scales = self.env.reward_scales
+        reward = (reward_goal * scales["goal"] - self.env.episode_length_buf.unsqueeze(1) * 0.01).clip(min=0) +\
+                 reward_robot_vel_to_ball * scales["robot_vel_to_ball"] +\
+                 reward_robot_to_ball * scales["robot_to_ball"] +\
+                 reward_ball_vel_to_goal * scales["ball_vel_to_goal"] +\
+                 reward_robot_ball_goal_pos * scales["robot_ball_goal_pos"] +\
+                 reward_ball_to_goal * scales["ball_to_goal"] +\
+                 reward_robot_yaw_to_ball * scales["robot_yaw_to_ball"]
 
         """
         info: {
@@ -386,9 +380,16 @@ class Go1FootballShootWrapper(EmptyWrapper):
             'time_outs': tensor([num_envs, ], dtype=torch.bool),
         }
         """
-        info["rew"] = {}
-        
-        
+        info["reward"] = {
+            "total": reward,
+            "goal": reward_goal,
+            "robot_ball_goal_pos": reward_robot_ball_goal_pos,
+            "robot_vel_to_ball": reward_robot_vel_to_ball,
+            "robot_to_ball": reward_robot_to_ball,
+            "ball_to_goal": reward_ball_to_goal,
+            "ball_vel_to_goal": reward_ball_vel_to_goal,
+            "robot_yaw_to_ball": reward_robot_yaw_to_ball,
+        }
         
         return obs, reward.squeeze(), termination, info
     
